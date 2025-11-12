@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RFL PRO - Case Game</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 20px;
+            color: white;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px 0;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .stat-box .label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .stat-box .value {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        
+        .cases-section {
+            margin-bottom: 30px;
+        }
+        
+        .cases-section h2 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+        
+        .cases-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .case-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .case-rusty {
+            background: #8B7355;
+            color: white;
+        }
+        
+        .case-rusty:active {
+            transform: scale(0.95);
+            background: #6B5345;
+        }
+        
+        .case-graffiti {
+            background: #FF6B6B;
+            color: white;
+        }
+        
+        .case-graffiti:active {
+            transform: scale(0.95);
+            background: #EE5A52;
+        }
+        
+        .case-tactical {
+            background: #51CF66;
+            color: white;
+        }
+        
+        .case-tactical:active {
+            transform: scale(0.95);
+            background: #40C057;
+        }
+        
+        .case-clutch {
+            background: #FFD93D;
+            color: #1a1a2e;
+        }
+        
+        .case-clutch:active {
+            transform: scale(0.95);
+            background: #F9CA24;
+        }
+        
+        .case-emoji {
+            font-size: 24px;
+        }
+        
+        .case-name {
+            font-size: 12px;
+        }
+        
+        .reward-display {
+            background: rgba(102, 126, 234, 0.2);
+            border: 2px solid #667eea;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        
+        .reward-display.hidden {
+            display: none;
+        }
+        
+        .reward-amount {
+            font-size: 36px;
+            font-weight: bold;
+            color: #FFD93D;
+            animation: bounce 0.5s ease;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .bottom-menu {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .menu-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-btn:active {
+            transform: scale(0.95);
+            background: #5568d3;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(102, 126, 234, 0.3);
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .leaderboard {
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            align-items: center;
+        }
+        
+        .leaderboard-rank {
+            font-weight: bold;
+            color: #667eea;
+            min-width: 30px;
+        }
+        
+        .leaderboard-name {
+            flex: 1;
+            margin: 0 10px;
+        }
+        
+        .leaderboard-coins {
+            color: #FFD93D;
+            font-weight: bold;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .modal-close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 RFL PRO</h1>
+            <p>Case Opening Game</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="label">💰 Coins</div>
+                <div class="value" id="coinDisplay">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="label">📦 Cases</div>
+                <div class="value" id="caseDisplay">0</div>
+            </div>
+        </div>
+        
+        <div class="reward-display hidden" id="rewardDisplay">
+            <div class="reward-amount" id="rewardAmount"></div>
+        </div>
+        
+        <div class="cases-section">
+            <h2>📁 Select Case</h2>
+            <div class="cases-grid">
+                <button class="case-btn case-rusty" onclick="openCase('rusty')">
+                    <span class="case-emoji">🟫</span>
+                    <span class="case-name">Rusty</span>
+                </button>
+                <button class="case-btn case-graffiti" onclick="openCase('graffiti')">
+                    <span class="case-emoji">🎨</span>
+                    <span class="case-name">Graffiti</span>
+                </button>
+                <button class="case-btn case-tactical" onclick="openCase('tactical')">
+                    <span class="case-emoji">🟢</span>
+                    <span class="case-name">Tactical</span>
+                </button>
+                <button class="case-btn case-clutch" onclick="openCase('clutch')">
+                    <span class="case-emoji">🟡</span>
+                    <span class="case-name">Clutch</span>
+                </button>
+            </div>
+        </div>
+        
+        <div class="bottom-menu">
+            <button class="menu-btn" onclick="showLeaderboard()">🏆 Leaderboard</button>
+            <button class="menu-btn" onclick="showStats()">📊 Stats</button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Opening case...</p>
+        </div>
+    </div>
+    
+    <div class="modal" id="leaderboardModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('leaderboardModal')">&times;</span>
+            <h2>🏆 Top Players</h2>
+            <div class="leaderboard" id="leaderboardList"></div>
+        </div>
+    </div>
+    
+    <div class="modal" id="statsModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('statsModal')">&times;</span>
+            <h2>📊 Your Stats</h2>
+            <div id="statsContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize Telegram Web App
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        
+        const userId = tg.initDataUnsafe.user?.id || 'user123';
+        const userName = tg.initDataUnsafe.user?.username || 'Player';
+        
+        // Game data
+        let playerData = {
+            coins: 2000,
+            casesOpened: 1,
+            bestReward: 2000
+        };
+        
+        const cases = {
+            rusty: { emoji: '🟫', rewards: [100, 200, 300, 500, 1000] },
+            graffiti: { emoji: '🎨', rewards: [500, 1000, 2000, 5000, 10000] },
+            tactical: { emoji: '🟢', rewards: [2000, 5000, 10000, 25000, 50000] },
+            clutch: { emoji: '🟡', rewards: [10000, 25000, 50000, 100000, 250000] }
+        };
+        
+        function openCase(caseType) {
+            const loading = document.getElementById('loading');
+            loading.style.display = 'block';
+            
+            setTimeout(() => {
+                const caseData = cases[caseType];
+                const reward = caseData.rewards[Math.floor(Math.random() * caseData.rewards.length)];
+                
+                playerData.coins += reward;
+                playerData.casesOpened += 1;
+                if (reward > playerData.bestReward) {
+                    playerData.bestReward = reward;
+                }
+                
+                showReward(reward);
+                updateDisplay();
+                loading.style.display = 'none';
+                
+                // Show animation
+                tg.HapticFeedback.impactOccurred('medium');
+            }, 1500);
+        }
+        
+        function showReward(amount) {
+            const display = document.getElementById('rewardDisplay');
+            const amountEl = document.getElementById('rewardAmount');
+            amountEl.textContent = `+${amount.toLocaleString()} 💰`;
+            display.classList.remove('hidden');
+            
+            setTimeout(() => {
+                display.classList.add('hidden');
+            }, 2000);
+        }
+        
+        function updateDisplay() {
+            document.getElementById('coinDisplay').textContent = playerData.coins.toLocaleString();
+            document.getElementById('caseDisplay').textContent = playerData.casesOpened;
+        }
+        
+        function showLeaderboard() {
+            const modal = document.getElementById('leaderboardModal');
+            const list = document.getElementById('leaderboardList');
+            
+            const leaderboard = [
+                { rank: 1, name: 'TopPlayer', coins: 50000 },
+                { rank: 2, name: 'ProGamer', coins: 45000 },
+                { rank: 3, name: 'CoinHunter', coins: 40000 },
+                { rank: 4, name: userName, coins: playerData.coins },
+                { rank: 5, name: 'Player5', coins: 25000 }
+            ];
+            
+            list.innerHTML = leaderboard.map(p => `
+                <div class="leaderboard-item">
+                    <span class="leaderboard-rank">#${p.rank}</span>
+                    <span class="leaderboard-name">${p.name}</span>
+                    <span class="leaderboard-coins">${p.coins.toLocaleString()}</span>
+                </div>
+            `).join('');
+            
+            modal.classList.add('show');
+        }
+        
+        function showStats() {
+            const modal = document.getElementById('statsModal');
+            const content = document.getElementById('statsContent');
+            
+            content.innerHTML = `
+                <div style="padding: 20px 0;">
+                    <p style="margin: 10px 0;"><strong>👤 Username:</strong> ${userName}</p>
+                    <p style="margin: 10px 0;"><strong>💰 Total Coins:</strong> ${playerData.coins.toLocaleString()}</p>
+                    <p style="margin: 10px 0;"><strong>📦 Cases Opened:</strong> ${playerData.casesOpened}</p>
+                    <p style="margin: 10px 0;"><strong>🌟 Best Reward:</strong> ${playerData.bestReward.toLocaleString()}</p>
+                </div>
+            `;
+            
+            modal.classList.add('show');
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+        
+        // Initialize
+        updateDisplay();
+        
+        // Close modals on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
